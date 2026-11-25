@@ -1,0 +1,24 @@
+# Pinned from a fresh Python 3.12 venv. Install with: pip install -r requirements.txt
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.68.0
+formulaic==1.2.2
+interface_meta==2.0.1
+kiwisolver==1.5.1
+matplotlib==3.11.2
+narwhals==2.29.0
+numpy==2.5.5
+packaging==26.4
+pandas==3.1.1
+patsy==1.0.3
+pillow==13.0.0
+psycopg2-binary==2.9.13
+pyparsing==3.3.3
+python-dateutil==4.0.0
+python-dotenv==1.2.4
+scipy==1.18.1
+SQLAlchemy==2.1.9
+statsmodels==0.15.0
+typing_extensions==4.16.0
+tzdata==2026.6
+wrapt==2.5.2

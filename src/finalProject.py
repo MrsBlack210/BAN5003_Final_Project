@@ -6,7 +6,7 @@ shipping rate, based on how much more freight each state adds than
 Sao Paulo for the same package.
 
 What this script does:
-  1. Connects to the Olist database.
+  1. Connects to the Olist database (or reads the CSV extract with --csv).
   2. Counts orders at each filter (delivered, single-item, valid measurements).
   3. Pulls delivered, single-item orders with valid weight and dimensions,
      and checks the row count against step 2.
@@ -19,20 +19,22 @@ What this script does:
      with 95% intervals.
   8. Prints the headline results in plain language (reais).
   9. Checks how far off the predictions are and saves a residual plot
-     (Fp_residuals.png).
+     (outputs/Fp_residuals.png).
  10. Checks whether weight and volume overlap too much (VIF).
  11. Refits without unusual freight orders to see if the answer changes.
 
-Requires:
-  - Python packages: pandas, statsmodels, sqlalchemy, psycopg2-binary, matplotlib
-  - A local PostgreSQL database named BAN5003 with the olist tables loaded
-    (schema "olist"). Edit ENGINE_URL if your database name or user differs.
+Requires: the packages in requirements.txt (see README.md, section 1).
 
-Run (from the project folder, using a Python that has the packages above):
-  python .vscode/finalProject.py
+Run (from the project folder):
+  python src/finalProject.py                                  # Path A: Postgres
+  python src/finalProject.py --csv data/olist_freight_extract.csv   # Path B: CSV
 """
 # autopep8: off
 # --- Load the libraries we need ---
+import argparse                              # reads the --csv option
+import os                                    # reads settings from .env
+from pathlib import Path                     # builds file paths
+from dotenv import load_dotenv               # loads the .env file
 from sqlalchemy import create_engine, text   # talks to the database
 import pandas as pd                          # works with tables of data
 import statsmodels.api as sm                 # needed for the VIF check
@@ -43,78 +45,68 @@ matplotlib.use("Agg")   # save the chart to a file instead of opening a window
 import matplotlib.pyplot as plt              # makes charts (after the backend is set)
 # autopep8: on
 
+# --- Folders the script uses (all relative to the project folder) ---
+ROOT = Path(__file__).resolve().parent.parent
+SQL_DIR = ROOT / "sql"
+OUTPUT_DIR = ROOT / "outputs"          # Step 9 saves the residual plot here
+OUTPUT_DIR.mkdir(exist_ok=True)
+
+# Rows the filters should leave (used to check the CSV in Path B)
+EXPECTED_ROWS = 86_825
+
+# --- Choose the data source ---
+# No option   -> Path A: run the SQL files against Postgres
+# --csv PATH  -> Path B: read the saved extract instead of the database
+parser = argparse.ArgumentParser(description="Olist freight cost analysis")
+parser.add_argument("--csv", help="path to the CSV extract (skips the database)")
+args = parser.parse_args()
+
+
 # --- STEP 1. Connect to the database ---
-# Where the database lives: on this computer, port 5432, named BAN5003
-ENGINE_URL = "postgresql+psycopg2://localhost:5432/BAN5003"
-engine = create_engine(ENGINE_URL)
+# The database address comes from DATABASE_URL in your .env file
+# (copy .env.example to .env and fill in your own Postgres user and database)
+if not args.csv:
+    load_dotenv(ROOT / ".env")
+    ENGINE_URL = os.getenv("DATABASE_URL",
+                           "postgresql+psycopg2://localhost:5432/BAN5003")
+    engine = create_engine(ENGINE_URL)
 
 
 # --- STEP 2. Count how many orders we keep at each filtering step ---
 # 1. Orders that were delivered
 # 2. Of those, orders with only one item
 # 3. Of those, products with real (non-zero) weight and size
-COUNTS_SQL = """
-WITH delivered AS (
-    SELECT order_id FROM olist.orders WHERE order_status = 'delivered'
-),
-single_item AS (
-    SELECT order_id FROM olist.order_items GROUP BY order_id HAVING COUNT(*) = 1
-)
-SELECT
-    (SELECT COUNT(*) FROM delivered) AS n_delivered,
-    (SELECT COUNT(*) FROM delivered d JOIN single_item s ON d.order_id = s.order_id)
-        AS n_single_item,
-    (SELECT COUNT(*)
-       FROM delivered d
-       JOIN single_item s        ON d.order_id = s.order_id
-       JOIN olist.order_items oi ON d.order_id = oi.order_id
-       JOIN olist.products p     ON oi.product_id = p.product_id
-      WHERE p.product_weight_g > 0 AND p.product_length_cm > 0
-        AND p.product_height_cm > 0 AND p.product_width_cm > 0) AS n_final
-"""
-# Run the count query and grab the single row of results
-with engine.connect() as conn:
-    counts = pd.read_sql(text(COUNTS_SQL), conn).iloc[0]
+# (The query is in sql/01_filter_counts.sql. Path B skips this step.)
+if not args.csv:
+    COUNTS_SQL = (SQL_DIR / "01_filter_counts.sql").read_text()
 
-# Turn the three counts into plain whole numbers
-n_delivered, n_single, n_final = (int(counts[c]) for c in
-                                  ["n_delivered", "n_single_item", "n_final"])
+    # Run the count query and grab the single row of results
+    with engine.connect() as conn:
+        counts = pd.read_sql(text(COUNTS_SQL), conn).iloc[0]
 
-# Print how many orders are left after each step
-print(f"Delivered orders:                       {n_delivered:,}")
-print(
-    f"  minus multi-item orders ({n_delivered - n_single:,}):      {n_single:,}")
-print(f"  minus zero/missing measurements ({n_single - n_final}): {n_final:,}")
+    # Turn the three counts into plain whole numbers
+    n_delivered, n_single, n_final = (int(counts[c]) for c in
+                                      ["n_delivered", "n_single_item", "n_final"])
+
+    # Print how many orders are left after each step
+    print(f"Delivered orders:                       {n_delivered:,}")
+    print(
+        f"  minus multi-item orders ({n_delivered - n_single:,}):      {n_single:,}")
+    print(f"  minus zero/missing measurements ({n_single - n_final}): {n_final:,}")
+else:
+    n_final = EXPECTED_ROWS
+    print(f"Reading the CSV extract: {args.csv} (filter counts need the database)")
 
 
 # --- STEP 3. Pull the actual data we will analyze ---
 # Same filters as above, but this time we grab the columns we need:
 # price, shipping cost (freight), product size/weight, and customer state
-QUERY = """
-SELECT
-    o.order_id,
-    oi.order_item_id,
-    o.order_purchase_timestamp,
-    oi.price::numeric             AS price,
-    oi.freight_value::numeric     AS freight_value,
-    p.product_weight_g::numeric   AS weight_g,
-    p.product_length_cm::numeric  AS length_cm,
-    p.product_height_cm::numeric  AS height_cm,
-    p.product_width_cm::numeric   AS width_cm,
-    c.customer_state
-FROM olist.orders o
-JOIN olist.order_items oi ON oi.order_id   = o.order_id
-JOIN olist.products    p  ON p.product_id  = oi.product_id
-JOIN olist.customers   c  ON c.customer_id = o.customer_id
-WHERE o.order_status = 'delivered'
-  AND o.order_id IN (SELECT order_id FROM olist.order_items
-                     GROUP BY order_id HAVING COUNT(*) = 1)
-  AND p.product_weight_g  > 0
-  AND p.product_length_cm > 0
-  AND p.product_height_cm > 0
-  AND p.product_width_cm  > 0
-"""
-df = pd.read_sql(QUERY, engine)   # load the results into a table called df
+# (The query is in sql/02_freight_extract.sql.)
+if not args.csv:
+    QUERY = (SQL_DIR / "02_freight_extract.sql").read_text()
+    df = pd.read_sql(text(QUERY), engine)   # load the results into a table called df
+else:
+    df = pd.read_csv(args.csv, parse_dates=["order_purchase_timestamp"])
 
 # Make sure the number columns are regular decimal numbers Python can do math on
 NUMERIC_COLS = ["price", "freight_value",
@@ -181,7 +173,7 @@ print(df["customer_state"].value_counts().sort_values().head(5).to_string())
 
 # --- STEP 9. How far off are the predictions? (residuals) ---
 # Residual stats (median miss, misses of R$10+ and R$50+)
-# Save the residual plot as Fp_residuals.png
+# Save the residual plot to OUTPUT_DIR / "Fp_residuals.png"
 
 
 # --- STEP 10. Are weight and volume too tangled together? (VIF) ---

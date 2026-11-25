@@ -1,0 +1,12 @@
+# Virtual environment - the grader builds their own from requirements.txt
+.venv/
+venv/
+
+# Your own database login - never commit this (use .env.example as the template)
+.env
+
+# Python and OS clutter
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
