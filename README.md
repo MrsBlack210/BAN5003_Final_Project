@@ -161,14 +161,14 @@ With `--csv`, the script skips the database. It reads the extract and checks it 
 | Person           | What AI was used for                                                            | What stayed human-written                                                        |
 | ---------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Brandon Gallegos | Creating comments, debugging code, creating the README, fixing format and typos | Base code, the base comments, the analysis design and SQL queries, python script |
-| [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
+| [Faustino Esqueda] | For troubleshooting, learning how to check if the analysis could be reproduced, reviewed the outputs | running the analysis on a different computer, comments, collaboration, |
 | [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
 | [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
 | [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
 
-**How we checked the AI's work:** every number in this README comes from running the script and was compared with the expected output. The AI's changes were reviewed before committing. [Edit this to match what the team actually did.]
+**How we checked the AI's work:** every number in this README comes from running the script and was compared with the expected output. The AI's changes were reviewed before committing. The team reviewed AI suggestions and checked the information against the existing Python code and expected outputs. All final decisions and results were reviewed by the team [Faustino]. [Edit this to match what the team actually did.]
 
 **Saved prompts and responses:** see `ai/prompts/`.
 
 - `ai/prompts/2026-11-24_claude_code_session.md`: the full Claude Code session (every prompt and Claude's written reply).
-- [Add each teammate's saved prompt and response files here.]
+- `ai/prompts/chatgpt_session_history.md`: Chatgpt questions about troubleshooting and checking reproducibility.
