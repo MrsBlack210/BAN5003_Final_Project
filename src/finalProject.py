@@ -152,6 +152,9 @@ print(df["customer_state"].value_counts().sort_values().head(5).to_string())
 # --- STEP 5. Convert weight to kg and package size to liters ---
 # Create df["weight_kg"] (grams / 1000) and df["volume_l"] (L x H x W / 1000)
 # Print a summary of both columns
+df["weight_kg"] = df["weight_g"] / 1000
+df["volume_l"] = (df["length_cm"] *df["height_cm"] * df["width_cm"]) / 1000
+print(df[["weight_kg", "volume_l"]].describe())
 
 
 # --- STEP 6. Fit the regression ---
