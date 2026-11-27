@@ -161,6 +161,10 @@ print(df[["weight_kg", "volume_l"]].describe())
 # Freight on weight_kg + volume_l + state, Sao Paulo as baseline, HC3 errors
 # Name the fitted model "model" and the state term "STATE" - later steps use them
 # Also fit a version with size in cm (L + H + W) and compare R-squared
+model = smf.ols(formula="freight_value ~ weight_kg + volume_l + C(customer_state, Treatment(reference='SP'))", data=df).fit(cov_type="HC3")
+model_size = smf.ols("freight_value ~ weight_kg + I(length_cm + height_cm + width_cm) + C(customer_state, Treatment/(reference='SP'))", data=df).fit(cov_type="HC3")
+print("model 1  R-squared:", model.rsquared)
+print("model 2 R-squared:", model_size.rsquared)
 
 
 # --- STEP 7. Coefficient table for the memo ---
