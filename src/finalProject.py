@@ -152,13 +152,26 @@ print(df["customer_state"].value_counts().sort_values().head(5).to_string())
 # --- STEP 5. Convert weight to kg and package size to liters ---
 # Create df["weight_kg"] (grams / 1000) and df["volume_l"] (L x H x W / 1000)
 # Print a summary of both columns
+df["weight_kg"] = df["weight_g"] / 1000
+df["volume_l"] = (df["length_cm"] * df["height_cm"] * df["width_cm"]) / 1000
+print(df[["weight_kg","volume_l"]].describe())
 
 
 # --- STEP 6. Fit the regression ---
 # Freight on weight_kg + volume_l + state, Sao Paulo as baseline, HC3 errors
 # Name the fitted model "model" and the state term "STATE" - later steps use them
 # Also fit a version with size in cm (L + H + W) and compare R-squared
+STATE = "C(customer_state, Treament(reference="SP'))"
+model = smf.ols(formula=f"freight_value ~ weight_kg + volume_l + {STATE}",
+data=df).fit(cov_type="HC3")
 
+model_size = smf.ols(
+  formula=f"freight_value ~ weight_kg + l(length_cm + heigth_cm +width_cm) + {STATE}",
+data=df)
+.fit(cov_type="HC3")
+
+print("Model 1 R-squared:", model.rsquared)
+print("Model 2 R-squared:", model_size.rsquared)
 
 # --- STEP 7. Coefficient table for the memo ---
 # Estimate, std error, 95% CI for each coefficient; name the table "results"
