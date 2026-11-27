@@ -164,6 +164,22 @@ print(df["customer_state"].value_counts().sort_values().head(5).to_string())
 # Estimate, std error, 95% CI for each coefficient; name the table "results"
 # Rename state rows to "state_XX"; name the state-only rows "states"
 # Print the memo rows, then all states vs. SP (most expensive first)
+ci = model.conf_int()
+results = pd.DataFrame({
+    "estimate": model.params,
+    "std_err": model.bse,
+    "ci_low": ci[0],
+    "ci_high": ci[1],
+})
+results.index = results.index.str.replace(
+    r".*\[T\.(\w+)\]", r"state_\1", regex=True)
+
+MEMO_ROWS = ["Intercept", "weight_kg", "volume_l", "state_RO", "state_RR",
+             "state_AM", "state_BA", "state_MG", "state_RJ", "state_PR"]
+print(results.loc[MEMO_ROWS].round(3).to_string())
+
+print("\nAll states vs. Sao Paulo, most expensive first:")
+states = results[results.index.str.startswith("state_")]
 
 
 # --- STEP 8. Plain-language headline results ---
