@@ -190,6 +190,26 @@ states = results[results.index.str.startswith("state_")]
 # --- STEP 9. How far off are the predictions? (residuals) ---
 # Residual stats (median miss, misses of R$10+ and R$50+)
 # Save the residual plot to OUTPUT_DIR / "Fp_residuals.png"
+miss = model.resid
+big = miss.abs() >= 50
+heavy = df["weight_kg"] > 2
+print(f"Half of orders miss by less than:  R${miss.abs().median():.2f}")
+print(
+    f"Miss by R$10 or more:              {(miss.abs() >= 10).mean():.1%} of orders")
+print(
+    f"Miss by R$50 or more:              {big.mean():.2%} of orders ({big.sum()})")
+print(f"  ...of those, above prediction:   {(miss[big] > 0).mean():.1%}")
+print(f"  ...of those, packages over 2 kg: {heavy[big].mean():.1%}")
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.scatter(model.fittedvalues, miss, s=4, alpha=0.3)
+ax.axhline(0, color="red", linewidth=1)
+ax.set_xlabel("Predicted freight (R$)")
+ax.set_ylabel("Actual minus predicted (R$)")
+ax.set_title("Residuals vs. fitted")
+fig.tight_layout()
+fig.savefig("Fp_residuals.png", dpi=150)
+print("\nSaved Fp_residuals.png - look for the fan shape on the right.")
 
 
 # --- STEP 10. Are weight and volume too tangled together? (VIF) ---
