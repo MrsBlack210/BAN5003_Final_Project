@@ -1,4 +1,4 @@
-# BAN5003 Final Project: Freight Costs Between Regions (Olist)
+# BAN5003 Final Project: Freight Costs Between States (Olist)
 
 **Business question:** What makes shipping cost more on Olist, and by how much in reais?
 
