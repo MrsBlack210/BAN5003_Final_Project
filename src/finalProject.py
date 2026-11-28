@@ -226,7 +226,7 @@ ax.set_xlabel("Predicted freight (R$)")
 ax.set_ylabel("Actual minus predicted (R$)")
 ax.set_title("Residuals vs. fitted")
 fig.tight_layout()
-fig.savefig("Fp_residuals.png", dpi=150)
+fig.savefig(ROOT / "Fp_residuals.png", dpi=150)
 print("\nSaved Fp_residuals.png - look for the fan shape on the right.")
 
 
