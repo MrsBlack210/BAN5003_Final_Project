@@ -4,7 +4,16 @@
 
 **Decision supported:** Which destination states should get a discounted shipping rate, based on how much more freight each state adds than São Paulo for the same package.
 
-**Team:** [names]
+Team name: QUANT LABS
+```
+Members and roles:
+Natasha Black — project lead
+Colton Russell/Brandon Gallegos — data lead
+Faustino Esqueda/Brandon Gallegos — modeling lead
+Mikayla Esqueda — communications lead
+Brandon Gallegos — AI integration lead
+VP of Olist Operations —
+```
 
 ```
 README.md            this file
