@@ -203,6 +203,26 @@ print(states.sort_values("estimate", ascending=False).round(2).to_string())
 # --- STEP 8. Plain-language headline results ---
 # Print the key numbers as sentences in reais (per kg, per liter, Rondonia,
 # the four highest-cost states, and the R-squared as a percent)
+kg, liter, ro = (results.loc[k] for k in ["weight_kg", "volume_l", "state_RO"])
+
+print(f"Each extra kg adds about R${kg.estimate:.2f} "
+      f"(95% CI R${kg.ci_low:.2f} to R${kg.ci_high:.2f}).")
+
+print(f"Each extra liter adds about R${liter.estimate:.2f}, "
+      f"or R${10 * liter.estimate:.2f} per 10 liters.")
+
+print(f"Rondonia costs about R${ro.estimate:.2f} more than Sao Paulo for the same "
+      f"package (95% CI R${ro.ci_low:.2f} to R${ro.ci_high:.2f}).")
+
+top = states.sort_values("estimate", ascending=False).head(4)
+top_names = ", ".join(name.replace("state_", "") for name in top.index)
+
+print(f"The four highest-cost states ({top_names}) add about "
+      f"R${top['estimate'].min():.0f} to R${top['estimate'].max():.0f} "
+      f"more than Sao Paulo for the same package.")
+
+print(f"Weight, size and destination explain {model.rsquared:.0%} of the "
+      f"variation in freight.")
 
 
 # --- STEP 9. How far off are the predictions? (residuals) ---
