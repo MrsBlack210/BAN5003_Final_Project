@@ -161,7 +161,7 @@ With `--csv`, the script skips the database. It reads the extract and checks it 
 | Person           | What AI was used for                                                            | What stayed human-written                                                        |
 | ---------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Brandon Gallegos | Creating comments, debugging code, creating the README, fixing format and typos | Base code, the base comments, the analysis design and SQL queries, python script |
-| [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
+| Mikayla Esqueda  | Reviewing code, understanding assignment requirements, GitHub guidance, and drafting and proofreading the business recommendation.                                                                                      | Personal revisions to the business recommendation and explanations of the analytical findings.|
 | [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
 | [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
 | [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
