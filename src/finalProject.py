@@ -193,6 +193,8 @@ print(results.loc[MEMO_ROWS].round(3).to_string())
 
 print("\nAll states vs. Sao Paulo, most expensive first:")
 states = results[results.index.str.startswith("state_")]
+print(states.sort_values("estimate", ascending=False).round(2).to_string())
+
 
 
 # --- STEP 8. Plain-language headline results ---
