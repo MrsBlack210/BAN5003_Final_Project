@@ -161,17 +161,20 @@ print(df[["weight_kg","volume_l"]].describe())
 # Freight on weight_kg + volume_l + state, Sao Paulo as baseline, HC3 errors
 # Name the fitted model "model" and the state term "STATE" - later steps use them
 # Also fit a version with size in cm (L + H + W) and compare R-squared
-STATE = "C(customer_state, Treament(reference="SP'))"
-model = smf.ols(formula=f"freight_value ~ weight_kg + volume_l + {STATE}",
-data=df).fit(cov_type="HC3")
+STATE = "C(customer_state, Treatment(reference='SP'))"
+model = smf.ols(f"freight_value ~ weight_kg + volume_l + {STATE}",
+                data=df).fit(cov_type="HC3")
 
-model_size = smf.ols(
-  formula=f"freight_value ~ weight_kg + l(length_cm + heigth_cm +width_cm) + {STATE}",
-data=df)
-.fit(cov_type="HC3")
+df["dims_cm"] = df["length_cm"] + df["height_cm"] + df["width_cm"]
+model_cm = smf.ols(f"freight_value ~ weight_kg + dims_cm + {STATE}",
+                   data=df).fit(cov_type="HC3")
 
-print("Model 1 R-squared:", model.rsquared)
-print("Model 2 R-squared:", model_size.rsquared)
+print(f"Rows used by the model: {int(model.nobs):,}")
+print(
+    f"R-squared with volume in liters:     {model.rsquared:.3f}   <- kept this one")
+print(f"R-squared with total size in cm:     {model_cm.rsquared:.3f}")
+print(f"Adjusted R-squared (kept model):     {model.rsquared_adj:.3f}")
+
 
 # --- STEP 7. Coefficient table for the memo ---
 # Estimate, std error, 95% CI for each coefficient; name the table "results"
