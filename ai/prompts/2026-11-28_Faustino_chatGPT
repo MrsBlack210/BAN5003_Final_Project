@@ -1,0 +1,34 @@
+Faustino - AI session Log
+AI Tools Used
+The free versions of ChatGPT and Claude were used to assist with the BAN5003 Final Project
+
+Project Overview
+I used ChatGPT (free version) as an AI assistant to help me with steps 5 and 6. My contribution focused on preparing product measurements and examining 
+how package weight, dimensions, and customer destination state relate to freight costs.
+
+Step 5 - Data Preparation
+Promt/Request:
+Help me review the data preparation code fore I convert the dimensions.
+How AI assisted:
+ChatGPT helped review the python code and interepret questions I had on the statistics.
+Work Completed:
+Converted product weight from grams to kilograms using weight_kg.
+Converted package dimensions into volume in liters using volume_l
+Reviewed statistics to understand the data.
+
+Step 6 - Regression Analysis
+Promt/Request:
+Help me review the regression models.
+How AI assisted:
+ChatGPT explained HC3 robost standard errors, and questions I had on the model results.
+Work Completed:
+Created a regression model using weight, volume, and customer state.
+Compared the volume model with a model using dimensions in centimeters.
+Reviewed R-squared and adjusted R-squared results.
+Interpret Regression coefficients and destination-state differences.
+
+Testing
+The script completed successfully with 86,825 rows matching the expected dataset count.
+
+GitHub Contribution
+My work focused on steps 5 and 6 in src/finalProject.py, including data preparation, regression analysis, interpretation of the results.
