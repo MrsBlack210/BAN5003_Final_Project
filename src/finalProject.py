@@ -100,39 +100,4 @@ fig.savefig(ROOT / "Fp_residuals.png", dpi=150)
 print("\nSaved Fp_residuals.png - look for the fan shape on the right.")
 
 
-# --- STEP 10. Are weight and volume too tangled together? (VIF) ---
-# VIF for weight_kg and volume_l, plus their correlation
-X = sm.add_constant(df[["weight_kg", "volume_l"]])
-vif = pd.DataFrame({
-    "variable": X.columns,
-    "VIF": [variance_inflation_factor(X.values, i) for i in range(X.shape[1])],
-})
-print(vif[vif["variable"] != "const"].round(2).to_string(index=False))
-print(f"\nCorrelation between weight and volume: "
-      f"{df['weight_kg'].corr(df['volume_l']):.2f}")
-print("Rule of thumb: under 5 is fine, over 10 is a problem.")
 
-
-# --- STEP 11. Do the odd freight orders change the answer? ---
-# Refit without R$0 freight / freight > price / both, compare state effects
-FORMULA = f"freight_value ~ weight_kg + volume_l + {STATE}"
-
-versions = {
-    "All orders":              df,
-    "Without R$0 freight":     df[df["freight_value"] > 0],
-    "Without freight > price": df[df["freight_value"] <= df["price"]],
-    "Without either":          df[(df["freight_value"] > 0)
-                                  & (df["freight_value"] <= df["price"])],
-}
-
-state_effects = {}
-for label, data in versions.items():
-    fit = smf.ols(FORMULA, data=data).fit(cov_type="HC3")
-    effects = fit.params[fit.params.index.str.contains(r"\[T\.")]
-    effects.index = effects.index.str.extract(r"\[T\.(\w+)\]")[0]
-    state_effects[label] = effects
-    print(f"{label:<26} rows: {len(data):,}   adj R2: {fit.rsquared_adj:.3f}")
-
-compare = pd.DataFrame(state_effects).rename_axis(None).round(2)
-print("\nExtra freight vs Sao Paulo (R$), for the top states:")
-print(compare.loc[["RO", "AC", "PB", "RR", "MA"]].to_string())
