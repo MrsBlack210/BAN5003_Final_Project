@@ -1,5 +1,5 @@
 """
-BAN5003 Final Project - Freight shipping costs between regions (Olist)
+BAN5003 Final Project - Freight shipping costs between states (Olist)
 
 Decision supported: which destination states should receive a discounted
 shipping rate, based on how much more freight each state adds than
