@@ -172,7 +172,7 @@ With `--csv`, the script skips the database. It reads the extract and checks it 
 | Brandon Gallegos | Creating comments, debugging code, creating the README, fixing format and typos | Base code, the base comments, the analysis design and SQL queries, python script |
 | Mikayla Esqueda  | Reviewing code, understanding assignment requirements, GitHub guidance, and drafting and proofreading the business recommendation.                                                                                      | Personal revisions to the business recommendation and explanations of the analytical findings.|
 | Colton Russell           | Helped recommend fixes, and SQL syntax errors                                                         | Base SQL and python code.                                                     |
-| [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
+| Faustino Esqueda           | Python troubleshooting, debugging code, fixing format and typos                                                         | Contributing to step 5 and 6, evaulating findings, base code.                                                     |
 | [Name]           | [What they used AI for]                                                         | [What they wrote themselves]                                                     |
 
 **How we checked the AI's work:** every number in this README comes from running the script and was compared with the expected output. The AI's changes were reviewed before committing. [Edit this to match what the team actually did.]
